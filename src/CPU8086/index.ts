@@ -76,10 +76,6 @@ export class CPU8086 {
         register.set(result);
     }
 
-    /**
-     * TODO: implement the following instructions:
-     * jmp: (BitBufferable, BitBufferable) | (Register) (pg.45)
-     */
     public jmp(csValue: BitBufferable, ipValue: BitBufferable): void;
     public jmp(registerID: RegisterID8086): void;
 
