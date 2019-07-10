@@ -38,7 +38,7 @@ export class CPU8086 {
     private readonly di = new PointerRegister(); // Destination string/index pointer
 
     // Segment Registers
-    private readonly cs = new SegmentRegister('0xFFFF'); // Code Segment (pg.46)
+    private readonly cs = new SegmentRegister('0xFFFF'); // Code Segment
     private readonly ds = new SegmentRegister(); // Data Segment
     private readonly ss = new SegmentRegister(); // Stack Segment
     private readonly es = new SegmentRegister(); // Extra Segment

@@ -14,7 +14,6 @@ class InnerRegister8 extends Register {
 
 }
 
-// TODO: This type of register can be treated as two 8-bit registers
 export class GeneralPurposeRegister extends Register16 {
 
     public readonly low = new InnerRegister8(this._data, 0);
