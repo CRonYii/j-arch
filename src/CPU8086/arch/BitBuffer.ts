@@ -7,12 +7,12 @@ export type BitBuffer = Array<BinaryDigit>;
 
 export type BitBufferable = BitBuffer | Register | string | number;
 
-const BASE = {
+const SupportedBase = {
     2: '0b',
     16: '0x'
 } as const;
 
-const HEX: any = {
+const hexToBinary: any = {
     '0': '0000',
     '1': '1000',
     '2': '0100',
@@ -30,6 +30,8 @@ const HEX: any = {
     'E': '0111',
     'F': '1111',
 };
+
+const decToHex = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 'A', 'B', 'C', 'D', 'E', 'F'];
 
 function fromBase2(num: string, size: number) {
     const result = new Array(size);
@@ -70,7 +72,7 @@ function fromBase10(num: number, size: number): BitBuffer {
 function fromBase16(num: string, size: number) {
     let result: (0 | 1)[] = [];
     for (const i of num) {
-        const digit = HEX[i];
+        const digit = hexToBinary[i];
         if (!digit) {
             throw new Error('The argument is not valid hex');
         }
@@ -80,13 +82,13 @@ function fromBase16(num: string, size: number) {
 }
 
 export const bitBuffer = {
-    from: function(num: string | number, size: number): BitBuffer {
+    from: function (num: string | number, size: number): BitBuffer {
         if (typeof num === 'string') {
             const base = num.substring(0, 2);
             num = num.substring(2);
             switch (base) {
-                case BASE[2]: return fromBase2(num, size);
-                case BASE[16]: return fromBase16(num, size);
+                case SupportedBase[2]: return fromBase2(num, size);
+                case SupportedBase[16]: return fromBase16(num, size);
             };
         } else if (typeof num === 'number') {
             return fromBase10(num, size);
@@ -96,7 +98,7 @@ export const bitBuffer = {
     /**
      * Returns a decimal representation of the data stored in the buffer.
      */
-    toDecimal: function(buffer: BitBuffer) {
+    toDecimal: function (buffer: BitBuffer) {
         let result = 0;
         for (let i = 0; i < buffer.length; i++) {
             if (buffer[i] === BINARY[1]) {
@@ -104,5 +106,29 @@ export const bitBuffer = {
             }
         }
         return result;
+    },
+    toHex: function (buffer: BitBuffer) {
+        let dec = this.toDecimal(buffer);
+        let result = '';
+        while (dec > 0) {
+            const letter = decToHex[dec % 16];
+            result = letter + result;
+            dec >>= 4;
+        }
+        return '0x' + result;
+    },
+    toPrecision: function(num: string, precision: number) {
+        const prefix = num.substring(0, 2);
+        if (prefix !== '0b' && prefix !== '0x') {
+            return num;
+        }
+        num = num.substring(2);
+        const offset = num.length - precision;
+        if (offset < 0) {
+            return prefix + '0'.repeat(-offset) + num;
+        } else if (offset > 0) {
+            return prefix + num.substring(offset);
+        }
+        return prefix + num;
     }
 };

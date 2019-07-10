@@ -1,13 +1,27 @@
-import { CPU8086 } from "./CPU8086";
+import { CPU8086, RegisterID8086 } from "./CPU8086";
 import { bitBuffer } from "./CPU8086/arch/BitBuffer";
 
 var cpu = new CPU8086();
 
-cpu.mov('ax', '0x4E20');
-cpu.add('ax', '0x1406');
-cpu.mov('bx', '0x2000');
-cpu.add('ax', cpu.getData('bx'));
-cpu.mov('bx', cpu.getData('ax'));
-cpu.add('ax', cpu.getData('bx'));
+function show(registerID: RegisterID8086) {
+    const value = cpu.getData(registerID);
+    const hex = bitBuffer.toHex(value);
+    const paddedHex = bitBuffer.toPrecision(hex, 4);
+    console.log(paddedHex);
+}
 
-console.log(bitBuffer.toDecimal(cpu.getData('ax')));
+cpu.mov('ax', '0x001A');
+cpu.mov('bx', '0x0026');
+
+cpu.add('al', cpu.getData('bl'));
+cpu.add('ah', cpu.getData('bl'));
+cpu.add('bh', cpu.getData('al'));
+
+cpu.mov('ah', 0);
+
+cpu.add('al', '0x85');
+show('ax');
+show('bx');
+cpu.add('al', '0x93');
+show('ax');
+show('bx');

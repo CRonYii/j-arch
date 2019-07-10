@@ -1,4 +1,3 @@
-import { halfAdd } from "../utils/Helper";
 import { BinaryDigit, BitBufferable } from "./arch/BitBuffer";
 import { FlagsRegister } from "./registers/FlagsRegister";
 import { GeneralPurposeRegister } from "./registers/GeneralPurposeRegister";
@@ -8,6 +7,8 @@ import { SegmentRegister } from "./registers/SegmentRegister";
 
 export type RegisterID8086 =
     'ax' | 'bx' | 'cx' | 'dx'
+    | 'ah' | 'al' | 'bh' | 'bl'
+    | 'ch' | 'cl' | 'dh' | 'dl'
     | 'sp' | 'bp' | 'si' | 'di'
     | 'cs' | 'ds' | 'ss' | 'es'
     | 'ip' | 'flags';
@@ -19,6 +20,16 @@ export class CPU8086 {
     private readonly bx = new GeneralPurposeRegister(); // Base: Count for loops, shifts
     private readonly cx = new GeneralPurposeRegister(); // Count: Pointer to base addresss (data)
     private readonly dx = new GeneralPurposeRegister(); // Data: Multiply, divide, I/O
+
+    // The Eight 8-bit Registers
+    private readonly ah = this.ax.high;
+    private readonly al = this.ax.low;
+    private readonly bh = this.bx.high;
+    private readonly bl = this.bx.low;
+    private readonly ch = this.cx.high;
+    private readonly cl = this.cx.low;
+    private readonly dh = this.dx.high;
+    private readonly dl = this.dx.low;
 
     // Pointer and Index Registers
     private readonly sp = new PointerRegister(); // Pointer to top of stack
@@ -61,7 +72,7 @@ export class CPU8086 {
             const digit1 = d1[i];
             const digit2 = d2[i];
 
-            const halfAddResult = halfAdd(digit1, digit2, carry);
+            const halfAddResult = this.fullAdd(digit1, digit2, carry);
             currentDigit = halfAddResult[0];
             carry = halfAddResult[1];
             result[i] = currentDigit;
@@ -72,6 +83,16 @@ export class CPU8086 {
 
     public getData(registerID: RegisterID8086) {
         return this[registerID].data();
+    }
+
+    private fullAdd(
+        digit1: BinaryDigit,
+        digit2: BinaryDigit,
+        carry: BinaryDigit
+    ): [BinaryDigit, BinaryDigit] {
+        const currentDigit = (digit1 ^ digit2 ^ carry) === 1 ? 1 : 0;
+        carry = digit1 && digit2 || digit1 ^ digit2 && carry;
+        return [currentDigit, carry];
     }
 
     /**

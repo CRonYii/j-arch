@@ -25,7 +25,7 @@ export class Register {
     protected constructor(options: RegisterOptions) {
         const { size, initialValue, offset = 0, buffer } = options;
         if (isNaN(offset) || offset < 0
-            || isNaN(size) || size <= offset) {
+            || isNaN(size) || (buffer ? buffer.length : size) <= offset) {
             throw new Error(`Invalid size and/or offset. [size=${size}, offset=${offset}]`);
         }
         this._size = size;
@@ -80,7 +80,7 @@ export class Register {
      * Returns a copy of the BitBuffer stored in the register.
      */
     public data(): BitBuffer {
-        return [...this._data].slice(this._offset, this._size);
+        return [...this._data].slice(this._offset, this._offset + this._size);
     }
 
     /**
@@ -88,6 +88,13 @@ export class Register {
      */
     public size() {
         return this._size;
+    }
+
+    /**
+     * Returns the offset of the register.
+     */
+    public offset() {
+        return this._offset;
     }
 
 }
