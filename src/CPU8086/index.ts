@@ -47,11 +47,6 @@ export class CPU8086 {
     private readonly ip = new InstructionPointerRegister();
     private readonly flags = new FlagsRegister();
 
-    /**
-     * TODO: implement the following instructions:
-     * jmp: (BitBufferable, BitBufferable) | (Register) (pg.45)
-     */
-
     public mov(registerID: RegisterID8086, value: BitBufferable) {
         this[registerID].set(value);
     }
@@ -81,7 +76,24 @@ export class CPU8086 {
         register.set(result);
     }
 
-    public getData(registerID: RegisterID8086) {
+    /**
+     * TODO: implement the following instructions:
+     * jmp: (BitBufferable, BitBufferable) | (Register) (pg.45)
+     */
+    public jmp(csValue: BitBufferable, ipValue: BitBufferable): void;
+    public jmp(registerID: RegisterID8086): void;
+
+    public jmp(arg1: any, arg2?: BitBufferable) {
+        if (arg1 && arg2) {
+            this.cs.set(arg1);
+            this.ip.set(arg2);
+        } else if (arg1) {
+            const value = this.get(arg1);
+            this.ip.set(value);
+        }
+    }
+
+    public get(registerID: RegisterID8086) {
         return this[registerID].data();
     }
 
