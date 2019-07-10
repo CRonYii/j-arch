@@ -1,0 +1,1 @@
+export const BINARY = { 0: 0, 1: 1 } as const;

@@ -1,0 +1,5 @@
+# TypeScript Build Files
+build
+
+# NPM
+node_modules
