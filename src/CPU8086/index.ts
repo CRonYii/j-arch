@@ -1,8 +1,16 @@
+import { halfAdd } from "../utils/Helper";
+import { BinaryDigit, BitBufferable } from "./arch/BitBuffer";
 import { FlagsRegister } from "./registers/FlagsRegister";
 import { GeneralPurposeRegister } from "./registers/GeneralPurposeRegister";
 import { InstructionPointerRegister } from "./registers/InstructionPointerRegister";
 import { PointerRegister } from "./registers/PointerRegister";
 import { SegmentRegister } from "./registers/SegmentRegister";
+
+export type RegisterID8086 =
+    'ax' | 'bx' | 'cx' | 'dx'
+    | 'sp' | 'bp' | 'si' | 'di'
+    | 'cs' | 'ds' | 'ss' | 'es'
+    | 'ip' | 'flags';
 
 export class CPU8086 {
 
@@ -30,17 +38,48 @@ export class CPU8086 {
 
     /**
      * TODO: implement the following instructions:
-     * mov: (Register, BitBufferable)
-     * add: (Register, BitBufferable)
      * jmp: (BitBufferable, BitBufferable) | (Register) (pg.45)
      */
 
-     /**
-      * TODO: implement the mechanism to execute instructions with CS and IP (pg.46)
-      * 1. Read the addresses from CS and IP, compute the actual memory address using the address adder
-      * 2. Retrieve the data stored in the memory address and the length of the insturcion
-      * 3. Write the data into Instruction Buffer, increment the IP
-      * 4. Execute the instruction, repeat from step 1
-      */
+    public mov(registerID: RegisterID8086, value: BitBufferable) {
+        this[registerID].set(value);
+    }
+
+    public add(registerID: RegisterID8086, value: BitBufferable) {
+        const register = this[registerID];
+
+        const size = register.size();
+        const d1 = register.data();
+        const d2 = register.toBitBuffer(value);
+
+        let currentDigit: BinaryDigit = 0;
+        let carry: BinaryDigit = 0;
+
+        const result = register.toBitBuffer(0);
+
+        for (let i = 0; i < size; i++) {
+            const digit1 = d1[i];
+            const digit2 = d2[i];
+
+            const halfAddResult = halfAdd(digit1, digit2, carry);
+            currentDigit = halfAddResult[0];
+            carry = halfAddResult[1];
+            result[i] = currentDigit;
+        }
+
+        register.set(result);
+    }
+
+    public getData(registerID: RegisterID8086) {
+        return this[registerID].data();
+    }
+
+    /**
+     * TODO: implement the mechanism to execute instructions with CS and IP (pg.46)
+     * 1. Read the addresses from CS and IP, compute the actual memory address using the address adder
+     * 2. Retrieve the data stored in the memory address and the length of the insturcion
+     * 3. Write the data into Instruction Buffer, increment the IP
+     * 4. Execute the instruction, repeat from step 1
+     */
 
 }

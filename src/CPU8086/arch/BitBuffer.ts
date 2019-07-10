@@ -79,16 +79,30 @@ function fromBase16(num: string, size: number) {
     return result.reverse().slice(0, size);
 }
 
-export function toBitBuffer(num: string | number, size: number): BitBuffer {
-    if (typeof num === 'string') {
-        const base = num.substring(0, 2);
-        num = num.substring(2);
-        switch (base) {
-            case BASE[2]: return fromBase2(num, size);
-            case BASE[16]: return fromBase16(num, size);
-        };
-    } else if (typeof num === 'number') {
-        return fromBase10(num, size);
+export const bitBuffer = {
+    from: function(num: string | number, size: number): BitBuffer {
+        if (typeof num === 'string') {
+            const base = num.substring(0, 2);
+            num = num.substring(2);
+            switch (base) {
+                case BASE[2]: return fromBase2(num, size);
+                case BASE[16]: return fromBase16(num, size);
+            };
+        } else if (typeof num === 'number') {
+            return fromBase10(num, size);
+        }
+        return new Array(size);
+    },
+    /**
+     * Returns a decimal representation of the data stored in the buffer.
+     */
+    toDecimal: function(buffer: BitBuffer) {
+        let result = 0;
+        for (let i = 0; i < buffer.length; i++) {
+            if (buffer[i] === BINARY[1]) {
+                result += 1 << i;
+            }
+        }
+        return result;
     }
-    return new Array(size);
 };
