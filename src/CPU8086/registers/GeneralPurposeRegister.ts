@@ -2,7 +2,7 @@ import { BitBufferable, BitBuffer } from "../arch/BitBuffer";
 import { Register } from "./Register";
 import { Register16 } from "./Register16";
 
-class InnerRegister8 extends Register {
+export class InnerRegister8 extends Register {
     
     constructor(buffer: BitBuffer, offset: number) {
         super({

@@ -1,5 +1,6 @@
-import { CPU8086, RegisterID8086 } from "./CPU8086";
+import { CPU8086 } from "./CPU8086";
 import { bitBuffer } from "./CPU8086/arch/BitBuffer";
+import { RegisterID8086 } from "./CPU8086/registers/types";
 
 var cpu = new CPU8086();
 

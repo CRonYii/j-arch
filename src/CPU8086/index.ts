@@ -1,17 +1,10 @@
 import { BinaryDigit, BitBufferable } from "./arch/BitBuffer";
 import { FlagsRegister } from "./registers/FlagsRegister";
-import { GeneralPurposeRegister } from "./registers/GeneralPurposeRegister";
+import { GeneralPurposeRegister, InnerRegister8 } from "./registers/GeneralPurposeRegister";
 import { InstructionPointerRegister } from "./registers/InstructionPointerRegister";
 import { PointerRegister } from "./registers/PointerRegister";
 import { SegmentRegister } from "./registers/SegmentRegister";
-
-export type RegisterID8086 =
-    'ax' | 'bx' | 'cx' | 'dx'
-    | 'ah' | 'al' | 'bh' | 'bl'
-    | 'ch' | 'cl' | 'dh' | 'dl'
-    | 'sp' | 'bp' | 'si' | 'di'
-    | 'cs' | 'ds' | 'ss' | 'es'
-    | 'ip' | 'flags';
+import { RegisterID8086, isRegisterID8086 } from "./registers/types";
 
 export class CPU8086 {
 
@@ -22,14 +15,14 @@ export class CPU8086 {
     private readonly dx = new GeneralPurposeRegister(); // Data: Multiply, divide, I/O
 
     // The Eight 8-bit Registers
-    private readonly ah = this.ax.high;
-    private readonly al = this.ax.low;
-    private readonly bh = this.bx.high;
-    private readonly bl = this.bx.low;
-    private readonly ch = this.cx.high;
-    private readonly cl = this.cx.low;
-    private readonly dh = this.dx.high;
-    private readonly dl = this.dx.low;
+    private readonly ah: InnerRegister8 = this.ax.high;
+    private readonly al: InnerRegister8 = this.ax.low;
+    private readonly bh: InnerRegister8 = this.bx.high;
+    private readonly bl: InnerRegister8 = this.bx.low;
+    private readonly ch: InnerRegister8 = this.cx.high;
+    private readonly cl: InnerRegister8 = this.cx.low;
+    private readonly dh: InnerRegister8 = this.dx.high;
+    private readonly dl: InnerRegister8 = this.dx.low;
 
     // Pointer and Index Registers
     private readonly sp = new PointerRegister(); // Pointer to top of stack
@@ -80,12 +73,12 @@ export class CPU8086 {
     public jmp(registerID: RegisterID8086): void;
 
     public jmp(arg1: any, arg2?: BitBufferable) {
-        if (arg1 && arg2) {
-            this.cs.set(arg1);
-            this.ip.set(arg2);
-        } else if (arg1) {
+        if (isRegisterID8086(arg1)) {
             const value = this.get(arg1);
             this.ip.set(value);
+        } else if (arg1 && arg2) {
+            this.cs.set(arg1);
+            this.ip.set(arg2);
         }
     }
 
