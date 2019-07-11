@@ -1,4 +1,4 @@
-import { BinaryDigit, BitBufferable } from "./arch/BitBuffer";
+import { BinaryDigit, ByteBufferable, ByteBuffer, BYTE_MAX } from "./arch/ByteBuffer";
 import { FlagsRegister } from "./registers/FlagsRegister";
 import { GeneralPurposeRegister, InnerRegister8 } from "./registers/GeneralPurposeRegister";
 import { InstructionPointerRegister } from "./registers/InstructionPointerRegister";
@@ -40,39 +40,35 @@ export class CPU8086 {
     private readonly ip = new InstructionPointerRegister();
     private readonly flags = new FlagsRegister();
 
-    public mov(registerID: RegisterID8086, value: BitBufferable) {
+    public mov(registerID: RegisterID8086, value: ByteBufferable) {
         this[registerID].set(value);
     }
 
-    public add(registerID: RegisterID8086, value: BitBufferable) {
+    public add(registerID: RegisterID8086, value: ByteBufferable) {
         const register = this[registerID];
 
         const size = register.size();
         const d1 = register.data();
-        const d2 = register.toBitBuffer(value);
+        const d2 = register.toByteBuffer(value);
 
-        let currentDigit: BinaryDigit = 0;
-        let carry: BinaryDigit = 0;
+        const result: ByteBuffer = new Uint8Array(size);
 
-        const result = register.toBitBuffer(0);
+        let carry = 0;
 
         for (let i = 0; i < size; i++) {
-            const digit1 = d1[i];
-            const digit2 = d2[i];
-
-            const halfAddResult = this.fullAdd(digit1, digit2, carry);
-            currentDigit = halfAddResult[0];
-            carry = halfAddResult[1];
-            result[i] = currentDigit;
+            const index = size - i - 1;
+            const sum = d1[index] + d2[index] + carry;
+            carry = sum > BYTE_MAX ? 1 : 0;
+            result[index] = sum % (BYTE_MAX + 1);
         }
 
         register.set(result);
     }
 
-    public jmp(csValue: BitBufferable, ipValue: BitBufferable): void;
+    public jmp(csValue: ByteBufferable, ipValue: ByteBufferable): void;
     public jmp(registerID: RegisterID8086): void;
 
-    public jmp(arg1: any, arg2?: BitBufferable) {
+    public jmp(arg1: any, arg2?: ByteBufferable) {
         if (isRegisterID8086(arg1)) {
             const value = this.get(arg1);
             this.ip.set(value);
@@ -84,16 +80,6 @@ export class CPU8086 {
 
     public get(registerID: RegisterID8086) {
         return this[registerID].data();
-    }
-
-    private fullAdd(
-        digit1: BinaryDigit,
-        digit2: BinaryDigit,
-        carry: BinaryDigit
-    ): [BinaryDigit, BinaryDigit] {
-        const currentDigit = (digit1 ^ digit2 ^ carry) === 1 ? 1 : 0;
-        carry = digit1 && digit2 || digit1 ^ digit2 && carry;
-        return [currentDigit, carry];
     }
 
     /**

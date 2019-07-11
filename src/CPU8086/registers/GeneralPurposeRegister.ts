@@ -1,12 +1,12 @@
-import { BitBufferable, BitBuffer } from "../arch/BitBuffer";
+import { ByteBufferable, ByteBuffer } from "../arch/ByteBuffer";
 import { Register } from "./Register";
 import { Register16 } from "./Register16";
 
 export class InnerRegister8 extends Register {
     
-    constructor(buffer: BitBuffer, offset: number) {
+    constructor(buffer: ByteBuffer, offset: number) {
         super({
-            size: 8,
+            size: 1,
             offset,
             buffer
         });
@@ -16,10 +16,10 @@ export class InnerRegister8 extends Register {
 
 export class GeneralPurposeRegister extends Register16 {
 
-    public readonly low = new InnerRegister8(this._data, 0);
-    public readonly high = new InnerRegister8(this._data, 8);
+    public readonly low = new InnerRegister8(this._data, 1);
+    public readonly high = new InnerRegister8(this._data, 0);
 
-    constructor(initialValue?: BitBufferable) {
+    constructor(initialValue?: ByteBufferable) {
         super(initialValue);
     }
 

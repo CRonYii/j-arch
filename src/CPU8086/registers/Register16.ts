@@ -1,11 +1,11 @@
-import { BitBufferable } from "../arch/BitBuffer";
+import { ByteBufferable } from "../arch/ByteBuffer";
 import { Register } from "./Register";
 
 export class Register16 extends Register {
 
-    constructor(initialValue?: BitBufferable) {
+    constructor(initialValue?: ByteBufferable) {
         super({
-            size: 16,
+            size: 2,
             initialValue
         });
     }

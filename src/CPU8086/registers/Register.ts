@@ -1,10 +1,10 @@
-import { BinaryDigit, BitBuffer, bitBuffer, BitBufferable } from "../arch/BitBuffer";
+import { ByteBuffer, byteBuffer, ByteBufferable } from "../arch/ByteBuffer";
 
 export interface RegisterOptions {
     size: number;
     offset?: number;
-    initialValue?: BitBufferable,
-    buffer?: BitBuffer
+    initialValue?: ByteBufferable,
+    buffer?: ByteBuffer
 }
 
 export class Register {
@@ -12,7 +12,7 @@ export class Register {
     /** the data container of the register,
      * each element in the array represents a one-digit binary.
      */
-    protected readonly _data: BitBuffer;
+    protected readonly _data: ByteBuffer;
 
     /** the number of binary digits the register can store. */
     protected readonly _size: number;
@@ -24,8 +24,8 @@ export class Register {
 
     protected constructor(options: RegisterOptions) {
         const { size, initialValue, offset = 0, buffer } = options;
-        if (isNaN(offset) || offset < 0
-            || isNaN(size) || (buffer ? buffer.length : size) <= offset) {
+        if (isNaN(offset) || offset < 0 ||
+            isNaN(size) || (buffer ? buffer.length : size) <= offset) {
             throw new Error(`Invalid size and/or offset. [size=${size}, offset=${offset}]`);
         }
         this._size = size;
@@ -34,20 +34,14 @@ export class Register {
             this._data = buffer;
             this.usingOutsideBuffer = true;
         } else {
-            this._data = this.toBitBuffer(initialValue || 0);
+            this._data = this.toByteBuffer(initialValue || 0);
         }
     }
 
-    private setBit(index: number, value: BinaryDigit) {
-        index += this._offset;
-        this._data[index] = value;
-    }
-
-    public set(value: BitBufferable) {
-        let data: BitBuffer = this.toBitBuffer(value);
-
-        for (let i = 0; i < this._size; i++) {
-            this.setBit(i, data[i]);
+    public set(value: ByteBufferable) {
+        const data: ByteBuffer = this.toByteBuffer(value);
+        for (let i = this._offset; i < this._offset + this._size; i++) {
+            this._data[i] = data[i - this._offset];
         }
     }
 
@@ -55,9 +49,9 @@ export class Register {
      * A helper function to convert BitBufferable to a BifBuffer
      * @param data anything that can be converted to BitBuffer
      */
-    public toBitBuffer(data: BitBufferable): BitBuffer {
+    public toByteBuffer(data: ByteBufferable): ByteBuffer {
         if (typeof data === 'string' || typeof data === 'number') {
-            data = bitBuffer.from(data, this._size);
+            data = byteBuffer.from(data, this._size);
         } else if (data instanceof Register) {
             data = data.data();
         }
@@ -72,15 +66,15 @@ export class Register {
      * to perform arithmetic operation with the BifBuffer.
      * @param buffer The BitBuffer to be compare with
      */
-    public compatible(buffer: BitBuffer): boolean {
+    public compatible(buffer: ByteBuffer): boolean {
         return this._size === buffer.length;
     }
 
     /**
      * Returns a copy of the BitBuffer stored in the register.
      */
-    public data(): BitBuffer {
-        return [...this._data].slice(this._offset, this._offset + this._size);
+    public data(): ByteBuffer {
+        return this._data.slice(this._offset, this._offset + this._size);
     }
 
     /**
