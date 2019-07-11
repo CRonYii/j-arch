@@ -102,20 +102,33 @@ function fromBase16(num: string, size: number): ByteBuffer {
 }
 
 export const byteBuffer = {
-    from: function (num: string | number, size: number): ByteBuffer {
-        if (typeof num === 'string') {
-            const base = num.substring(0, 2);
-            num = num.substring(2);
+    from: function (data: ByteBufferable, size: number): ByteBuffer {
+        if (typeof data === 'string') {
+            const base = data.substring(0, 2);
+            data = data.substring(2);
             switch (base) {
-                case SupportedBase[2]: return fromBase2(num, size);
-                case SupportedBase[16]: return fromBase16(num, size);
+                case SupportedBase[2]: return fromBase2(data, size);
+                case SupportedBase[16]: return fromBase16(data, size);
             };
-        } else if (typeof num === 'number') {
-            return fromBase10(num, size);
+        } else if (typeof data === 'number') {
+            return fromBase10(data, size);
+        } else if (data instanceof Uint8Array) {
+            return data;
+        } else if (data instanceof Register) {
+            return data.data();
         }
         return new Uint8Array(size);
     },
-    toHex: function (buffer: ByteBuffer) {
+    value: function (buffer: ByteBuffer): number {
+        let result = 0;
+        for (let i = 0; i < buffer.length; i++) {
+            result <<= BITS_IN_BYTE;
+            const byte = buffer[i];
+            result |= byte;
+        }
+        return result;
+    },
+    toHex: function (buffer: ByteBuffer): string {
         let result = '';
         for (let i = 0; i < buffer.length; i++) {
             const byteword = buffer[i];
@@ -138,5 +151,12 @@ export const byteBuffer = {
             return prefix + num.substring(offset);
         }
         return prefix + num;
+    },
+    is: function (arg: any): arg is ByteBuffer {
+        return arg != null &&
+            (
+                typeof arg === 'string' || typeof arg === 'number' ||
+                arg instanceof Register || arg instanceof Uint8Array
+            );
     }
 };

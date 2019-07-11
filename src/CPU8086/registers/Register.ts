@@ -10,14 +10,14 @@ export interface RegisterOptions {
 export class Register {
 
     /** the data container of the register,
-     * each element in the array represents a one-digit binary.
+     * each element in the array represents one byte.
      */
     protected readonly _data: ByteBuffer;
 
     /** the number of binary digits the register can store. */
     protected readonly _size: number;
 
-    /** the offset indicates the starting index of the _data BitBuffer */
+    /** the offset indicates the starting index of the _data ByteBuffer */
     protected readonly _offset: number;
 
     public readonly usingOutsideBuffer: boolean = false;
@@ -46,8 +46,8 @@ export class Register {
     }
 
     /**
-     * A helper function to convert BitBufferable to a BifBuffer
-     * @param data anything that can be converted to BitBuffer
+     * A helper function to convert ByteBufferable to a ByteBuffer
+     * @param data anything that can be converted to ByteBuffer
      */
     public toByteBuffer(data: ByteBufferable): ByteBuffer {
         if (typeof data === 'string' || typeof data === 'number') {
@@ -64,21 +64,21 @@ export class Register {
     /**
      * Determine whether or not the register is compatible 
      * to perform arithmetic operation with the BifBuffer.
-     * @param buffer The BitBuffer to be compare with
+     * @param buffer The ByteBuffer to be compare with
      */
     public compatible(buffer: ByteBuffer): boolean {
         return this._size === buffer.length;
     }
 
     /**
-     * Returns a copy of the BitBuffer stored in the register.
+     * Returns a copy of the ByteBuffer stored in the register.
      */
     public data(): ByteBuffer {
         return this._data.slice(this._offset, this._offset + this._size);
     }
 
     /**
-     * Returns the number of bits that can be stored in the register.
+     * Returns the number of bytes that can be stored in the register.
      */
     public size() {
         return this._size;
